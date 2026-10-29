@@ -1,0 +1,150 @@
+classdef grafik_gerak_parabola_mediapemb < matlab.apps.AppBase
+
+    % Properties that correspond to app components
+    properties (Access = public)
+        UIFigure                    matlab.ui.Figure
+        KeluaranPanel               matlab.ui.container.Panel
+        RMaxEditField               matlab.ui.control.EditField
+        RMaxEditFieldLabel          matlab.ui.control.Label
+        HMaxEditField               matlab.ui.control.EditField
+        HMaxEditFieldLabel          matlab.ui.control.Label
+        ProsesButton                matlab.ui.control.Button
+        MasukanPanel                matlab.ui.container.Panel
+        SudutElevasiEditField       matlab.ui.control.NumericEditField
+        SudutElevasiEditFieldLabel  matlab.ui.control.Label
+        KecAwalEditField            matlab.ui.control.NumericEditField
+        KecAwalEditFieldLabel       matlab.ui.control.Label
+        UIAxes                      matlab.ui.control.UIAxes
+    end
+
+    % Callbacks that handle component events
+    methods (Access = private)
+
+        % Button pushed function: ProsesButton
+        function ProsesButtonPushed(app, event)
+            v0 = app.KecAwalEditField.Value;
+            theta = app.SudutElevasiEditField.Value;
+            theta = theta/180*pi;
+
+            g = 10;
+            tmax = 2*v0*sin(theta)/g;
+            t = 0:0.01:tmax;
+            h = v0*sin(theta).*t-0.5*g*(t.^2);
+            r = v0*cos(theta).*t;
+            plot(app.UIAxes,r,h,'r')
+            grid(app.UIAxes,'on')
+            title(app.UIAxes, 'Grafik Gerak Parabola')
+            xlabel(app.UIAxes,'jarak (m)')
+            ylabel(app.UIAxes,'ketinggian (m)')
+            hmax = ((v0^2)*(sin(theta)^2)/(2*g));
+            rmax = ((v0^2)*(sin(2*theta)))/g;
+            app.HMaxEditField.Value = strcat(num2str(hmax), 'm');
+            app.RMaxEditField.Value = strcat(num2str(rmax), 'm');
+        end
+    end
+
+    % Component initialization
+    methods (Access = private)
+
+        % Create UIFigure and components
+        function createComponents(app)
+
+            % Create UIFigure and hide until all components are created
+            app.UIFigure = uifigure('Visible', 'off');
+            app.UIFigure.Position = [100 100 640 480];
+            app.UIFigure.Name = 'MATLAB App';
+
+            % Create UIAxes
+            app.UIAxes = uiaxes(app.UIFigure);
+            title(app.UIAxes, 'Title')
+            xlabel(app.UIAxes, 'X')
+            ylabel(app.UIAxes, 'Y')
+            zlabel(app.UIAxes, 'Z')
+            app.UIAxes.Position = [27 196 570 255];
+
+            % Create MasukanPanel
+            app.MasukanPanel = uipanel(app.UIFigure);
+            app.MasukanPanel.Title = 'Masukan';
+            app.MasukanPanel.Position = [43 56 216 106];
+
+            % Create KecAwalEditFieldLabel
+            app.KecAwalEditFieldLabel = uilabel(app.MasukanPanel);
+            app.KecAwalEditFieldLabel.HorizontalAlignment = 'right';
+            app.KecAwalEditFieldLabel.Position = [30 51 57 22];
+            app.KecAwalEditFieldLabel.Text = 'Kec. Awal';
+
+            % Create KecAwalEditField
+            app.KecAwalEditField = uieditfield(app.MasukanPanel, 'numeric');
+            app.KecAwalEditField.Position = [102 51 100 22];
+
+            % Create SudutElevasiEditFieldLabel
+            app.SudutElevasiEditFieldLabel = uilabel(app.MasukanPanel);
+            app.SudutElevasiEditFieldLabel.HorizontalAlignment = 'right';
+            app.SudutElevasiEditFieldLabel.Position = [9 20 78 22];
+            app.SudutElevasiEditFieldLabel.Text = 'Sudut Elevasi';
+
+            % Create SudutElevasiEditField
+            app.SudutElevasiEditField = uieditfield(app.MasukanPanel, 'numeric');
+            app.SudutElevasiEditField.Position = [102 20 100 22];
+
+            % Create ProsesButton
+            app.ProsesButton = uibutton(app.UIFigure, 'push');
+            app.ProsesButton.ButtonPushedFcn = createCallbackFcn(app, @ProsesButtonPushed, true);
+            app.ProsesButton.Position = [280 107 100 22];
+            app.ProsesButton.Text = 'Proses';
+
+            % Create KeluaranPanel
+            app.KeluaranPanel = uipanel(app.UIFigure);
+            app.KeluaranPanel.Title = 'Keluaran';
+            app.KeluaranPanel.Position = [397 56 208 106];
+
+            % Create HMaxEditFieldLabel
+            app.HMaxEditFieldLabel = uilabel(app.KeluaranPanel);
+            app.HMaxEditFieldLabel.HorizontalAlignment = 'right';
+            app.HMaxEditFieldLabel.Position = [31 51 43 22];
+            app.HMaxEditFieldLabel.Text = 'H. Max';
+
+            % Create HMaxEditField
+            app.HMaxEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.HMaxEditField.Position = [89 51 100 22];
+
+            % Create RMaxEditFieldLabel
+            app.RMaxEditFieldLabel = uilabel(app.KeluaranPanel);
+            app.RMaxEditFieldLabel.HorizontalAlignment = 'right';
+            app.RMaxEditFieldLabel.Position = [31 20 43 22];
+            app.RMaxEditFieldLabel.Text = 'R. Max';
+
+            % Create RMaxEditField
+            app.RMaxEditField = uieditfield(app.KeluaranPanel, 'text');
+            app.RMaxEditField.Position = [89 20 100 22];
+
+            % Show the figure after all components are created
+            app.UIFigure.Visible = 'on';
+        end
+    end
+
+    % App creation and deletion
+    methods (Access = public)
+
+        % Construct app
+        function app = grafik_gerak_parabola_mediapemb
+
+            % Create UIFigure and components
+            createComponents(app)
+
+            % Register the app with App Designer
+            registerApp(app, app.UIFigure)
+
+            if nargout == 0
+                clear app
+            end
+        end
+
+        % Code that executes before app deletion
+        function delete(app)
+
+            % Delete UIFigure when app is deleted
+            delete(app.UIFigure)
+        end
+    end
+end
